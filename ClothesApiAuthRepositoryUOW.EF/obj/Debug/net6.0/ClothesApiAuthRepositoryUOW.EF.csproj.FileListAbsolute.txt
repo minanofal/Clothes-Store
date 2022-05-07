@@ -1,0 +1,17 @@
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\bin\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.deps.json
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\bin\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.runtimeconfig.json
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\bin\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.dll
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\bin\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.pdb
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\bin\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.dll
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\bin\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.pdb
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.csproj.AssemblyReference.cache
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.AssemblyInfoInputs.cache
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.AssemblyInfo.cs
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.csproj.CoreCompileInputs.cache
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.csproj.CopyComplete
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.dll
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\obj\Debug\net6.0\refint\ClothesApiAuthRepositoryUOW.EF.dll
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.pdb
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.EF.genruntimeconfig.cache
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.EF\obj\Debug\net6.0\ref\ClothesApiAuthRepositoryUOW.EF.dll

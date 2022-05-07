@@ -1,0 +1,12 @@
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\bin\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.deps.json
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\bin\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.dll
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\bin\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.pdb
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.csproj.AssemblyReference.cache
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.AssemblyInfoInputs.cache
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.AssemblyInfo.cs
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.csproj.CoreCompileInputs.cache
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.dll
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\obj\Debug\net6.0\refint\ClothesApiAuthRepositoryUOW.Core.dll
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\obj\Debug\net6.0\ClothesApiAuthRepositoryUOW.Core.pdb
+C:\Users\Kimo Store\source\repos\ClothesApiAuthRepositoryUOW\ClothesApiAuthRepositoryUOW.Core\obj\Debug\net6.0\ref\ClothesApiAuthRepositoryUOW.Core.dll
