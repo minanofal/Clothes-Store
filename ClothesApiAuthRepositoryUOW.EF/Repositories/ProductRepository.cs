@@ -28,7 +28,7 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
 
         public async Task<Product_color_sizeDisplayDto> CreatePrduct_Size_color(Product_Size_Color_formDto prduct_size)
         {
-            if (!_context.products.Where(x => x.Id == prduct_size.ProductID).Any())
+            if (!_context.products.AsNoTracking().Where(x => x.Id == prduct_size.ProductID).Any())
                 return  new Product_color_sizeDisplayDto (){ Message = $"No Product With Id {prduct_size.ProductID}" };
 
             
@@ -43,18 +43,18 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
                 
                 }
 
-                _context.SaveChanges();
                 
-                if (await _context.Colors.Where(x => x.ProductId == prduct_size.ProductID && x.color == color_size.Color).FirstOrDefaultAsync() == null) {
+                
+                if (await _context.Colors.AsNoTracking().Where(x => x.ProductId == prduct_size.ProductID && x.color == color_size.Color).FirstOrDefaultAsync() == null) {
                     
                     _context.Colors.Add(new Color { ProductId = prduct_size.ProductID, color = color_size.Color }); }  
                 
 
-                if(! _context.sizes.Where(x=>x.ProductId==prduct_size.ProductID && x.size==color_size.Size).Any())
+                if(! _context.sizes.AsNoTracking().Where(x=>x.ProductId==prduct_size.ProductID && x.size==color_size.Size).Any())
                     _context.sizes.Add(new Size { ProductId=prduct_size.ProductID, size=color_size.Size });
 
 
-                if (!_context.product_Color_Sizes.Where(x => x.ProductId == prduct_size.ProductID && x.Size == color_size.Size && x.Color == color_size.Color).Any())
+                if (!_context.product_Color_Sizes.AsNoTracking().Where(x => x.ProductId == prduct_size.ProductID && x.Size == color_size.Size && x.Color == color_size.Color).Any())
                     _context.product_Color_Sizes.Add(new Product_Color_Size_Dto { ProductId = prduct_size.ProductID, Color = color_size.Color, Size = color_size.Size });
             }
             _context.SaveChanges();
@@ -71,12 +71,12 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
         public async Task<ProductDisplayDto> CreateProduct(ProductFormDto dto)
         {
             var product = new ProductDisplayDto();
-            if (_context.categories.Find(dto.CategoryId) == null)
+            if (!_context.categories.AsNoTracking().Any(x=>x.Id== dto.CategoryId))
             {
                 product.Message = $"No Category With id {dto.CategoryId}";
                 return product;
             }
-            if (_context.types.Find(dto.TypeId)==null)
+            if (!_context.types.AsNoTracking().Any(x=>x.Id ==dto.TypeId))
             {
                 product.Message = $"No Category With id {dto.TypeId}";
                 return product;
@@ -118,14 +118,14 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
             _context.SaveChanges();
 
              AddImage(data.Id, images);
-            if (_context.Type_Categories.FirstOrDefault(x=>x.TypeId ==dto.TypeId && x.CategoryId == dto.CategoryId) == null)
+            if (!_context.Type_Categories.AsNoTracking().Any(x=>x.TypeId ==dto.TypeId && x.CategoryId == dto.CategoryId) )
             {
                 _context.Type_Categories.Add(new Type_Category { CategoryId = dto.CategoryId , TypeId=dto.TypeId });
             }
 
             foreach(var color in dto.Colors.Distinct())
             {
-                if (_context.Colors.Where(x => x.ProductId == data.Id && x.color == color).FirstOrDefault() == null)
+                if (!_context.Colors.AsNoTracking().Where(x => x.ProductId == data.Id && x.color == color).Any())
                 {
                     _context.Colors.Add(new Color { color = color, ProductId = data.Id });
                     
@@ -154,7 +154,7 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
         public async Task<DeleteDisplay> DeleteProduct(int id)
         {
             
-            if (! _context.products.Where(x=>x.Id==id).Any())
+            if (! _context.products.AsNoTracking().Where(x=>x.Id==id).Any())
                 return new DeleteDisplay { Delete = false , Message =$"NO Product with Id {id}" };
 
             _context.products.Remove(_context.products.Where(x=>x.Id==id).FirstOrDefault());
@@ -197,7 +197,7 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
 
         public async Task<ProductDisplayDto> UpdateProduct(EditeProductFormDto dto, int id)
         {
-            var Product = await _context.products.FirstOrDefaultAsync(x => x.Id == id);
+            var Product = await _context.products.AsNoTracking().FirstOrDefaultAsync(x => x.Id == id);
             var product = new ProductDisplayDto();
             if (Product == null)
             {
@@ -206,12 +206,12 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
             }
                 
 
-            if (_context.categories.Find(dto.CategoryId) == null)
+            if (!_context.categories.AsNoTracking().Any(x=>x.Id==dto.CategoryId) )
             {
                 product.Message = $"No Category With id {dto.CategoryId}";
                 return product;
             }
-            if (_context.types.Find(dto.TypeId) == null)
+            if (!_context.types.AsNoTracking().Any(x => x.Id == dto.TypeId))
             {
                 product.Message = $"No Category With id {dto.TypeId}";
                 return product;
@@ -255,7 +255,7 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
 
                 AddImage(id, images);
             }
-            if (_context.Type_Categories.FirstOrDefault(x => x.TypeId == dto.TypeId && x.CategoryId == dto.CategoryId) == null)
+            if (_context.Type_Categories.AsNoTracking().FirstOrDefault(x => x.TypeId == dto.TypeId && x.CategoryId == dto.CategoryId) == null)
             {
                 _context.Type_Categories.Add(new Type_Category { CategoryId = dto.CategoryId, TypeId = dto.TypeId });
             }
@@ -325,7 +325,7 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
 
         public async Task<Product_color_sizeDisplayDto> UpatePrduct_Size_color(IEnumerable< Product_Color_Size> prduct_size, int id)
         {
-            if (!_context.products.Where(x=>x.Id == id).Any())
+            if (!_context.products.AsNoTracking().Where(x=>x.Id == id).Any())
                 return new Product_color_sizeDisplayDto() { Message = $"No product with Id {id}" };
 
             _context.product_Color_Sizes.RemoveRange(_context.product_Color_Sizes.Where(x => x.ProductId == id).ToList());
