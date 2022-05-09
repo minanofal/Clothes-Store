@@ -12,10 +12,14 @@ namespace ClothesApiAuthRepositoryUOW.Core.Interfaces
         Task<T> CreateAsync(T entity);
         Task<T> UpdateAsync(T entity);
 
+        Task<bool> Any(Expression<Func<T, bool>> match);
         Task<IEnumerable<T>> GetData(Expression<Func<T, bool>> match = null, string[] Includes=null);
         Task<string> DeleteAsync(int id);
 
-       
+        void DeleteAsyncmatch(Expression<Func<T, bool>> match);
+
+
+
 
     }
 }

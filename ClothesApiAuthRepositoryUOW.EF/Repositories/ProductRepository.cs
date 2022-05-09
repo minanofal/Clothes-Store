@@ -18,12 +18,26 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
-        
-
-        public ProductRepository(ApplicationDbContext context, IMapper mapper) 
+        private readonly IImageRepository _Images;
+        private readonly IBaseRepository<Type_Category> _Type_Category;
+        private readonly ICategoryRepository _Category;
+        private readonly IBaseRepository<Core.Models.Type> _Type;
+        private readonly IBaseRepository<Color> _color;
+        private readonly IBaseRepository<Size> _Size;
+        private readonly IBaseRepository<Product_Color_Size_Dto> _Poroduct_Color_sizes;
+        public ProductRepository(ApplicationDbContext context, IMapper mapper, IImageRepository unitOfWork, 
+            IBaseRepository<Type_Category> Type_Category , ICategoryRepository Category,  IBaseRepository<Core.Models.Type> Type
+            , IBaseRepository<Color> color , IBaseRepository<Size> size , IBaseRepository<Product_Color_Size_Dto> Poroduct_Color_sizes)
         {
             _context = context;
             _mapper = mapper;
+            _Images = unitOfWork;
+            _Type_Category = Type_Category;
+            _Type = Type;
+            _Category = Category;
+            _color = color;
+            _Size = size;
+            _Poroduct_Color_sizes = Poroduct_Color_sizes;
         }
 
         public async Task<Product_color_sizeDisplayDto> CreatePrduct_Size_color(Product_Size_Color_formDto prduct_size)
@@ -31,35 +45,31 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
             if (!_context.products.AsNoTracking().Where(x => x.Id == prduct_size.ProductID).Any())
                 return  new Product_color_sizeDisplayDto (){ Message = $"No Product With Id {prduct_size.ProductID}" };
 
+            var check = SizesConstants.CheckSize(prduct_size.ProductColorSizes.Select(x => x.Size).ToList());
+
+            if (check != null)
+                return new Product_color_sizeDisplayDto() { Message = check };
             
 
             foreach(var color_size in prduct_size.ProductColorSizes.Distinct())
             {
-                if (!SizesConstants.SizesList.Contains(color_size.Size.ToUpper())) 
-                {
-                    var sizes = "";
-                    foreach (var size in SizesConstants.SizesList) { sizes = sizes + " " + size; }
-                    return new Product_color_sizeDisplayDto() { Message = $"only sizes {sizes}" }; 
-                
-                }
-
                 
                 
-                if (await _context.Colors.AsNoTracking().Where(x => x.ProductId == prduct_size.ProductID && x.color == color_size.Color).FirstOrDefaultAsync() == null) {
+                if (!await _color.Any(x => x.ProductId == prduct_size.ProductID && x.color == color_size.Color) ) {
                     
-                    _context.Colors.Add(new Color { ProductId = prduct_size.ProductID, color = color_size.Color }); }  
+                   await _color.CreateAsync(new Color { ProductId = prduct_size.ProductID, color = color_size.Color }); }  
                 
 
-                if(! _context.sizes.AsNoTracking().Where(x=>x.ProductId==prduct_size.ProductID && x.size==color_size.Size).Any())
-                    _context.sizes.Add(new Size { ProductId=prduct_size.ProductID, size=color_size.Size });
+                if(! await _Size.Any(x => x.ProductId == prduct_size.ProductID && x.size == color_size.Size))
+                    await _Size.CreateAsync(new Size { ProductId=prduct_size.ProductID, size=color_size.Size });
 
 
-                if (!_context.product_Color_Sizes.AsNoTracking().Where(x => x.ProductId == prduct_size.ProductID && x.Size == color_size.Size && x.Color == color_size.Color).Any())
-                    _context.product_Color_Sizes.Add(new Product_Color_Size_Dto { ProductId = prduct_size.ProductID, Color = color_size.Color, Size = color_size.Size });
+                if (!await _Poroduct_Color_sizes.Any(x => x.ProductId == prduct_size.ProductID && x.Size == color_size.Size && x.Color == color_size.Color))
+                    await _Poroduct_Color_sizes.CreateAsync(new Product_Color_Size_Dto { ProductId = prduct_size.ProductID, Color = color_size.Color, Size = color_size.Size });
             }
             _context.SaveChanges();
 
-            var productscolorsizes = _context.product_Color_Sizes.Where(x => x.ProductId == prduct_size.ProductID).ToList();
+            var productscolorsizes =await _Poroduct_Color_sizes.GetData(x => x.ProductId == prduct_size.ProductID);
             var  datacolorsize = _mapper.Map<IEnumerable<Product_Color_Size>>(productscolorsizes);
             var data = new Product_color_sizeDisplayDto() { product_Color_Sizes = datacolorsize};
            
@@ -70,82 +80,55 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
 
         public async Task<ProductDisplayDto> CreateProduct(ProductFormDto dto)
         {
-            var product = new ProductDisplayDto();
-            if (!_context.categories.AsNoTracking().Any(x=>x.Id== dto.CategoryId))
-            {
-                product.Message = $"No Category With id {dto.CategoryId}";
+             
+            var product = await CheckValidProducts(dto.CategoryId, dto.TypeId, dto.Gender, dto.Sizes, dto.Images); ;
+            if (product.Message != null)
                 return product;
-            }
-            if (!_context.types.AsNoTracking().Any(x=>x.Id ==dto.TypeId))
-            {
-                product.Message = $"No Category With id {dto.TypeId}";
-                return product;
-            }
-            if (!GenderConstant.GendersList.Contains(dto.Gender.ToUpper()))
-            {
-                product.Message = $"Gender IS Male or Female (M OR F)";
-                return product;
-            }
-            if (dto.Gender.ToUpper() == "MALE")
-                dto.Gender = "M";
-            if (dto.Gender.ToUpper() == "FEMALE")
-                dto.Gender = "F";
-
-            foreach (var _size in dto.Sizes.Distinct())
-            {
-
-                if (!SizesConstants.SizesList.Contains(_size.ToUpper()))
-                {
-                    var sizes = "";
-                    foreach (var size in SizesConstants.SizesList) { sizes = sizes + " " + size; }
-                    return new ProductDisplayDto() { Message = $"only sizes {sizes}" };
-
-
-                }
-            }
-
-
+           
+            dto.Gender = dto.Gender.ToUpper().ToArray()[0].ToString();
             var data = _mapper.Map<Product>(dto);
-            var images = ImageToByteArray(dto.Images);
-
-            
-            if(images == null)
-            {
-                product.Message = ".jpg and .png images And max length is 1mg";
-                return product;
-            }
-           await _context.AddAsync(data);
+            await _context.AddAsync(data);
             _context.SaveChanges();
 
-             AddImage(data.Id, images);
-            if (!_context.Type_Categories.AsNoTracking().Any(x=>x.TypeId ==dto.TypeId && x.CategoryId == dto.CategoryId) )
+            var images = ImageConstants.ImageToByteArray(dto.Images);
+            _Images.CreateProductsImages(images, data.Id);
+            
+            if (!await _Type_Category.Any(x => x.TypeId == dto.TypeId && x.CategoryId == dto.CategoryId))
             {
-                _context.Type_Categories.Add(new Type_Category { CategoryId = dto.CategoryId , TypeId=dto.TypeId });
+                _Type_Category.CreateAsync(new Type_Category { CategoryId = dto.CategoryId , TypeId=dto.TypeId });
             }
 
             foreach(var color in dto.Colors.Distinct())
             {
-                if (!_context.Colors.AsNoTracking().Where(x => x.ProductId == data.Id && x.color == color).Any())
+                if (! await _color.Any(x => x.ProductId == data.Id && x.color == color))
                 {
-                    _context.Colors.Add(new Color { color = color, ProductId = data.Id });
+                    await _color.CreateAsync(new Color { color = color, ProductId = data.Id });
                     
                 }
             }
             foreach (var _size in dto.Sizes.Distinct())
             {
-                if (_context.sizes.Where(x => x.ProductId == data.Id && x.size == _size).FirstOrDefault() == null)
+                if( ! await _Size.Any(x => x.ProductId == data.Id && x.size == _size))
                 {
-                    _context.sizes.Add(new Size { size = _size, ProductId = data.Id });
+                    _Size.CreateAsync(new Size { size = _size, ProductId = data.Id });
                     
                 }
             }
 
+
             _context.SaveChanges();
             product = _mapper.Map<ProductDisplayDto>(data);
+           
+
+            var Images = await _Images.GetData(x => x.productId == product.Id);
+            var CategoryName = await _Category.GetData(x => x.Id == data.CategoryId);
+            var TypeName = await _Type.GetData(x => x.Id == data.TypeId);
+
+            product.CategoryName = CategoryName.SingleOrDefault().Name;
+            product.TypeName = TypeName.SingleOrDefault().Name;
             product.Colors = dto.Colors;
             product.sizes = dto.Sizes;
-            
-            product.Images = _context.productImages.Where(x => x.productId == product.Id).Select(x=>new ImageDisplayDto { Id=x.Id , Image = x.Image}).ToList();
+            product.Images = _mapper.Map<IEnumerable<ImageDisplayDto>>(Images);
             product.Message = null;
             return product;
 
@@ -204,123 +187,74 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
                 product.Message = $"No Product with id {id}";
                 return product;
             }
-                
 
-            if (!_context.categories.AsNoTracking().Any(x=>x.Id==dto.CategoryId) )
-            {
-                product.Message = $"No Category With id {dto.CategoryId}";
+            product= await CheckValidProducts(dto.CategoryId, dto.TypeId, dto.Gender, dto.Sizes, dto.AddedImages);
+            if (product.Message != null)
                 return product;
-            }
-            if (!_context.types.AsNoTracking().Any(x => x.Id == dto.TypeId))
-            {
-                product.Message = $"No Category With id {dto.TypeId}";
-                return product;
-            }
-            if (!GenderConstant.GendersList.Contains(dto.Gender.ToUpper()))
-            {
-                product.Message = $"Gender IS Male or Female (M OR F)";
-                return product;
-            }
-            if (dto.Gender.ToUpper() == "MALE")
-                dto.Gender = "M";
-            if (dto.Gender.ToUpper() == "FEMALE")
-                dto.Gender = "F";
 
-            foreach (var _size in dto.Sizes.Distinct())
-            {
-
-                if (!SizesConstants.SizesList.Contains(_size.ToUpper()))
-                {
-                    var sizes = "";
-                    foreach (var size in SizesConstants.SizesList) { sizes = sizes + " " + size; }
-                    return new ProductDisplayDto() { Message = $"only sizes {sizes}" };
-
-
-                }
-            }
+           
             Product.Price = dto.Price;
             Product.CategoryId = dto.CategoryId;
             Product.TypeId = dto.TypeId;
             Product.Name = dto.Name;
-            Product.Gender = dto.Gender.ToCharArray()[0];
+            Product.Gender = dto.Gender.ToUpper().ToArray()[0] ;
            
             if (dto.AddedImages != null)
             {
-                var images = ImageToByteArray(dto.AddedImages);
-                if (images == null)
-                {
-                    product.Message = ".jpg and .png images And max length is 1mg";
-                    return product;
-                }
-
-                AddImage(id, images);
+                var images = ImageConstants.ImageToByteArray(dto.AddedImages);
+                _Images.CreateProductsImages(images,id);
             }
-            if (_context.Type_Categories.AsNoTracking().FirstOrDefault(x => x.TypeId == dto.TypeId && x.CategoryId == dto.CategoryId) == null)
+            if (! await _Type_Category.Any(x => x.TypeId == dto.TypeId && x.CategoryId == dto.CategoryId))
             {
-                _context.Type_Categories.Add(new Type_Category { CategoryId = dto.CategoryId, TypeId = dto.TypeId });
+                _Type_Category.CreateAsync(new Type_Category { CategoryId = dto.CategoryId, TypeId = dto.TypeId });
             }
-
-            _context.Colors.RemoveRange(_context.Colors.Where(x => x.ProductId == id).ToList());
-            _context.sizes.RemoveRange(_context.sizes.Where(x => x.ProductId == id).ToList());
+            if (dto.DeletedImages != null)
+            {
+                foreach (var img in dto.DeletedImages)
+                {
+                   await _Images.DeleteAsync(img);
+                }
+            }
+             _color.DeleteAsyncmatch(x => x.ProductId == id);
+            _Size.DeleteAsyncmatch(x => x.ProductId == id);
             _context.SaveChanges();
+
             foreach (var color in dto.Colors.Distinct())
             {
-                if (_context.Colors.Where(x => x.ProductId == id && x.color == color).FirstOrDefault() == null)
+                if (! await _color.Any(x => x.ProductId == id && x.color == color))
                 {
-                    _context.Colors.Add(new Color { color = color, ProductId =id });
+                    _color.CreateAsync(new Color { color = color, ProductId =id });
 
                 }
             }
             foreach (var _size in dto.Sizes.Distinct())
             {
-                if (_context.sizes.Where(x => x.ProductId == id && x.size == _size).FirstOrDefault() == null)
+                if (! await _Size.Any(x => x.ProductId == id && x.size == _size))
                 {
-                    _context.sizes.Add(new Size { size = _size, ProductId = id });
+                    _Size.CreateAsync(new Size { size = _size, ProductId = id });
 
                 }
             }
-
-            foreach(var img in dto.DeletedImages)
-            {
-                _context.productImages.Remove(_context.productImages.Find(img));
-            }
+           
 
 
-            _context.SaveChanges();
+          
+
+
             product = _mapper.Map<ProductDisplayDto>(Product);
+            var Images = await _Images.GetData(x => x.productId ==id);
+            var CategoryName = await _Category.GetData(x => x.Id == dto.CategoryId);
+            var TypeName = await _Type.GetData(x => x.Id == dto.TypeId);
+
+            product.CategoryName = CategoryName.SingleOrDefault().Name;
+            product.TypeName = TypeName.SingleOrDefault().Name;
+            product.Images = _mapper.Map<IEnumerable<ImageDisplayDto>>(Images);
             product.Colors = dto.Colors;
             product.sizes = dto.Sizes;
-
-            product.Images = _context.productImages.Where(x => x.productId == product.Id).Select(x => new ImageDisplayDto { Id = x.Id, Image = x.Image }).ToList();
             product.Message = null;
+            _context.SaveChanges();
             return product;
 
-        }
-
-        private List<byte[]> ImageToByteArray(IEnumerable<IFormFile> ImageFiles)
-        {
-            var images = new List<byte[]>();
-            using var datastream = new MemoryStream();
-            foreach (IFormFile file in ImageFiles)
-            {
-                if (!ImageConstants.ImageExtention.Contains(Path.GetExtension(file.FileName).ToLower()) || ImageConstants.MaxLength < file.Length)
-                    return new List<byte[]>();
-                file.CopyTo(datastream);
-                images.Add(datastream.ToArray());
-                
-            }
-            return images;
-        }
-        private void AddImage(int productID , List<byte[]> images)
-        {
-            foreach (var image in images)
-            {
-
-                _context.productImages.Add(new ProductImage { productId = productID  , Image = image });
-
-
-
-            }
         }
 
         public async Task<Product_color_sizeDisplayDto> UpatePrduct_Size_color(IEnumerable< Product_Color_Size> prduct_size, int id)
@@ -333,16 +267,22 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
 
             return await CreatePrduct_Size_color(data) ;
         }
-
-        public async Task<IEnumerable< CategoryDisplayDto>> GetCategoryGender( char gender)
+        private  async  Task<ProductDisplayDto> CheckValidProducts(int CategoryId , int TypeId , string Gender , IEnumerable<string> sizes , IEnumerable<IFormFile> ImageFiles)
         {
-            var category = await _context.products
-                .Include(x => x.Category)
-                .Where(x =>  x.Gender == gender)
-                .Select(x => new CategoryDisplayDto { Id = x.CategoryId, Name = x.Category.Name })
-                .ToListAsync();
-            return category;
-                
+            var product = new ProductDisplayDto();
+            if (! await _Category.Any(x => x.Id == CategoryId))
+            {
+                product.Message = $"No Category With id {CategoryId} ";
+            }
+            if (! await  _Type.Any(x => x.Id == TypeId))
+            {
+                product.Message += $"No Type With id {TypeId} ";  
+            }
+            product.Message = product.Message == null ? product.Message = GenderConstant.CheckGender(Gender) : product.Message += " " + GenderConstant.CheckGender(Gender);
+            product.Message= product.Message == null ? product.Message =  SizesConstants.CheckSize(sizes) : product.Message += " "+ SizesConstants.CheckSize(sizes) ;
+            if( ImageFiles !=null)
+                product.Message = product.Message == null ?product.Message= ImageConstants.CheckImageValid(ImageFiles) : product.Message +=" "+ ImageConstants.CheckImageValid(ImageFiles);
+            return product;
         }
     }
 }

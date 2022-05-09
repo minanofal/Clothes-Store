@@ -25,4 +25,8 @@
     <ProjectReference Include="..\ClothesApiAuthRepositoryUOW.Core\ClothesApiAuthRepositoryUOW.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\" />
+  </ItemGroup>
+
 </Project>

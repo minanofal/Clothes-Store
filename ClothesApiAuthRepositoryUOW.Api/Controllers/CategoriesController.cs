@@ -62,7 +62,7 @@ namespace ClothesApiAuthRepositoryUOW.Api.Controllers
 
             char g = gender.ToUpper().ToCharArray()[0];
 
-            var categories = await _unitofwork.Products.GetCategoryGender(g);
+            var categories = await _unitofwork.Categories.GetCategoryByGender(g);
             if (!categories.Any())
                 return NotFound("No categories in this Gender");
             return Ok(categories);

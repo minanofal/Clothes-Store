@@ -16,9 +16,16 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
         {
             _context = context;
         }
+
+        public async Task<bool> Any(Expression<Func<T, bool>> match)
+        {
+            return _context.Set<T>().Any(match);
+        }
+
         public async Task<T> CreateAsync(T entity)
         {
             await _context.AddAsync(entity);
+            _context.SaveChanges();
             return entity;
         }
         public async Task<string> DeleteAsync(int id)
@@ -27,8 +34,18 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
             if (entity == null)
                 return $"No Item With Id{id}";
             _context.Set<T>().Remove(entity);
+            _context.SaveChanges();
             return "Item Delted Successfully";
+            
         }
+
+        public void DeleteAsyncmatch(Expression<Func<T, bool>> match)
+        {
+            var entity = _context.Set<T>().Where(match).ToList();
+            _context.RemoveRange(entity);
+            _context.SaveChanges();
+        }
+
         public async Task<IEnumerable<T>> GetData(Expression<Func<T, bool>> match = null,string[] Includes= null)
         {
             IQueryable<T> query =  _context.Set<T>();
@@ -51,6 +68,7 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
         public async Task<T> UpdateAsync(T entity)
         {
             _context.Update(entity);
+            _context.SaveChanges();
             return entity;
         }
     }

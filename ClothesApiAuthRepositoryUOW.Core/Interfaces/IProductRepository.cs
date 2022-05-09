@@ -20,7 +20,7 @@ namespace ClothesApiAuthRepositoryUOW.Core.Interfaces
         Task<DeleteDisplay> DeleteProduct(int id);
         Task<ProductDisplayDto> UpdateProduct(EditeProductFormDto dto , int id);
 
-        Task<IEnumerable<CategoryDisplayDto>> GetCategoryGender( char gender);
+        
 
     }
 }
