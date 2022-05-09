@@ -10,7 +10,7 @@ namespace ClothesApiAuthRepositoryUOW.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    //[Authorize]
     public class ProductsController : ControllerBase
     {
         private readonly IUnitOfWork _unitofwork;
@@ -148,7 +148,7 @@ namespace ClothesApiAuthRepositoryUOW.Api.Controllers
 
 
         ///DeleteMehods
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpDelete("DeleteProduct/{Id}")]
         public async Task<IActionResult> DelteAsync(int Id)
         {
@@ -163,7 +163,7 @@ namespace ClothesApiAuthRepositoryUOW.Api.Controllers
         }
 
         ///EditMethods
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPut("UpdateProduct/{Id}")]
         public async Task<IActionResult> UpdateAsync([FromForm] EditeProductFormDto dto , int Id)
         {
@@ -178,7 +178,7 @@ namespace ClothesApiAuthRepositoryUOW.Api.Controllers
                 return BadRequest(data.Message);
             return Ok(data);
         }
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPut("UpdateProductColorSize/{Id}")]
         public async Task<IActionResult> UpdateColorSize([FromBody] IEnumerable<Product_Color_Size> dto, int Id)
         {
@@ -195,7 +195,7 @@ namespace ClothesApiAuthRepositoryUOW.Api.Controllers
 
 
         /////PostMehods
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("CreateProduct")]
         public async Task<IActionResult> CreateAsync([FromForm] ProductFormDto dto)
         {
@@ -210,7 +210,7 @@ namespace ClothesApiAuthRepositoryUOW.Api.Controllers
             _unitofwork.Complete();
             return Ok(cat);
         }
-        [Authorize(Roles = "Admin")]
+        //[Authorize(Roles = "Admin")]
         [HttpPost("AddProductColorSize")]
         public async Task<IActionResult> CreateColorSize([FromBody] Product_Size_Color_formDto dto)
         {

@@ -17,27 +17,37 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
     public class ProductRepository : IProductRepository
     {
         private readonly ApplicationDbContext _context;
+
+        private readonly IUseAllRepositoryEXProduct _useAllRepositoryEXProduct;
         private readonly IMapper _mapper;
-        private readonly IImageRepository _Images;
-        private readonly IBaseRepository<Type_Category> _Type_Category;
-        private readonly ICategoryRepository _Category;
-        private readonly IBaseRepository<Core.Models.Type> _Type;
-        private readonly IBaseRepository<Color> _color;
-        private readonly IBaseRepository<Size> _Size;
-        private readonly IBaseRepository<Product_Color_Size_Dto> _Poroduct_Color_sizes;
-        public ProductRepository(ApplicationDbContext context, IMapper mapper, IImageRepository unitOfWork, 
-            IBaseRepository<Type_Category> Type_Category , ICategoryRepository Category,  IBaseRepository<Core.Models.Type> Type
-            , IBaseRepository<Color> color , IBaseRepository<Size> size , IBaseRepository<Product_Color_Size_Dto> Poroduct_Color_sizes)
+        //private readonly IImageRepository _Images;
+        //private readonly IBaseRepository<Type_Category> _Type_Category;
+        //private readonly ICategoryRepository _Category;
+        //private readonly IBaseRepository<Core.Models.Type> _Type;
+        //private readonly IBaseRepository<Color> _color;
+        //private readonly IBaseRepository<Size> _Size;
+        //private readonly IBaseRepository<Product_Color_Size_Dto> _Poroduct_Color_sizes;
+
+        //public ProductRepository(ApplicationDbContext context, IMapper mapper, IImageRepository unitOfWork, 
+        //    IBaseRepository<Type_Category> Type_Category , ICategoryRepository Category,  IBaseRepository<Core.Models.Type> Type
+        //    , IBaseRepository<Color> color , IBaseRepository<Size> size , IBaseRepository<Product_Color_Size_Dto> Poroduct_Color_sizes)
+        //{
+        //    _context = context;
+        //    _mapper = mapper;
+        //    _Images = unitOfWork;
+        //    _Type_Category = Type_Category;
+        //    _Type = Type;
+        //    _Category = Category;
+        //    _color = color;
+        //    _Size = size;
+        //    _Poroduct_Color_sizes = Poroduct_Color_sizes;
+        //}
+
+        public ProductRepository(ApplicationDbContext context, IMapper mapper, IUseAllRepositoryEXProduct useAllRepositoryEXProduct)
         {
             _context = context;
             _mapper = mapper;
-            _Images = unitOfWork;
-            _Type_Category = Type_Category;
-            _Type = Type;
-            _Category = Category;
-            _color = color;
-            _Size = size;
-            _Poroduct_Color_sizes = Poroduct_Color_sizes;
+            _useAllRepositoryEXProduct = useAllRepositoryEXProduct;
         }
 
         public async Task<Product_color_sizeDisplayDto> CreatePrduct_Size_color(Product_Size_Color_formDto prduct_size)
@@ -55,21 +65,21 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
             {
                 
                 
-                if (!await _color.Any(x => x.ProductId == prduct_size.ProductID && x.color == color_size.Color) ) {
+                if (!await _useAllRepositoryEXProduct.Color.Any(x => x.ProductId == prduct_size.ProductID && x.color == color_size.Color) ) {
                     
-                   await _color.CreateAsync(new Color { ProductId = prduct_size.ProductID, color = color_size.Color }); }  
+                   await _useAllRepositoryEXProduct.Color.CreateAsync(new Color { ProductId = prduct_size.ProductID, color = color_size.Color }); }  
                 
 
-                if(! await _Size.Any(x => x.ProductId == prduct_size.ProductID && x.size == color_size.Size))
-                    await _Size.CreateAsync(new Size { ProductId=prduct_size.ProductID, size=color_size.Size });
+                if(! await _useAllRepositoryEXProduct.Size.Any(x => x.ProductId == prduct_size.ProductID && x.size == color_size.Size))
+                    await _useAllRepositoryEXProduct.Size.CreateAsync(new Size { ProductId=prduct_size.ProductID, size=color_size.Size });
 
 
-                if (!await _Poroduct_Color_sizes.Any(x => x.ProductId == prduct_size.ProductID && x.Size == color_size.Size && x.Color == color_size.Color))
-                    await _Poroduct_Color_sizes.CreateAsync(new Product_Color_Size_Dto { ProductId = prduct_size.ProductID, Color = color_size.Color, Size = color_size.Size });
+                if (!await _useAllRepositoryEXProduct.Poroduct_Color_sizes.Any(x => x.ProductId == prduct_size.ProductID && x.Size == color_size.Size && x.Color == color_size.Color))
+                    await _useAllRepositoryEXProduct.Poroduct_Color_sizes.CreateAsync(new Product_Color_Size_Dto { ProductId = prduct_size.ProductID, Color = color_size.Color, Size = color_size.Size });
             }
             _context.SaveChanges();
 
-            var productscolorsizes =await _Poroduct_Color_sizes.GetData(x => x.ProductId == prduct_size.ProductID);
+            var productscolorsizes =await _useAllRepositoryEXProduct.Poroduct_Color_sizes.GetData(x => x.ProductId == prduct_size.ProductID);
             var  datacolorsize = _mapper.Map<IEnumerable<Product_Color_Size>>(productscolorsizes);
             var data = new Product_color_sizeDisplayDto() { product_Color_Sizes = datacolorsize};
            
@@ -91,26 +101,26 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
             _context.SaveChanges();
 
             var images = ImageConstants.ImageToByteArray(dto.Images);
-            _Images.CreateProductsImages(images, data.Id);
+            _useAllRepositoryEXProduct.Images.CreateProductsImages(images, data.Id);
             
-            if (!await _Type_Category.Any(x => x.TypeId == dto.TypeId && x.CategoryId == dto.CategoryId))
+            if (!await _useAllRepositoryEXProduct.Type_Category.Any(x => x.TypeId == dto.TypeId && x.CategoryId == dto.CategoryId))
             {
-                _Type_Category.CreateAsync(new Type_Category { CategoryId = dto.CategoryId , TypeId=dto.TypeId });
+               await _useAllRepositoryEXProduct.Type_Category.CreateAsync(new Type_Category { CategoryId = dto.CategoryId , TypeId=dto.TypeId });
             }
 
             foreach(var color in dto.Colors.Distinct())
             {
-                if (! await _color.Any(x => x.ProductId == data.Id && x.color == color))
+                if (! await _useAllRepositoryEXProduct.Color.Any(x => x.ProductId == data.Id && x.color == color))
                 {
-                    await _color.CreateAsync(new Color { color = color, ProductId = data.Id });
+                    await _useAllRepositoryEXProduct.Color.CreateAsync(new Color { color = color, ProductId = data.Id });
                     
                 }
             }
             foreach (var _size in dto.Sizes.Distinct())
             {
-                if( ! await _Size.Any(x => x.ProductId == data.Id && x.size == _size))
+                if( ! await _useAllRepositoryEXProduct.Size.Any(x => x.ProductId == data.Id && x.size == _size))
                 {
-                    _Size.CreateAsync(new Size { size = _size, ProductId = data.Id });
+                   await _useAllRepositoryEXProduct.Size.CreateAsync(new Size { size = _size, ProductId = data.Id });
                     
                 }
             }
@@ -120,11 +130,11 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
             product = _mapper.Map<ProductDisplayDto>(data);
            
 
-            var Images = await _Images.GetData(x => x.productId == product.Id);
-            var CategoryName = await _Category.GetData(x => x.Id == data.CategoryId);
-            var TypeName = await _Type.GetData(x => x.Id == data.TypeId);
+            var Images = await _useAllRepositoryEXProduct.Images.GetData(x => x.productId == product.Id);
+            var CategoryName = await _useAllRepositoryEXProduct.Categories.GetData(x => x.Id == data.CategoryId);
+            var TypeName = await _useAllRepositoryEXProduct.Types.GetData(x => x.Id == data.TypeId);
 
-            product.CategoryName = CategoryName.SingleOrDefault().Name;
+            product.CategoryName =  CategoryName.SingleOrDefault().Name;
             product.TypeName = TypeName.SingleOrDefault().Name;
             product.Colors = dto.Colors;
             product.sizes = dto.Sizes;
@@ -202,36 +212,37 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
             if (dto.AddedImages != null)
             {
                 var images = ImageConstants.ImageToByteArray(dto.AddedImages);
-                _Images.CreateProductsImages(images,id);
+                _useAllRepositoryEXProduct.Images.CreateProductsImages(images,id);
             }
-            if (! await _Type_Category.Any(x => x.TypeId == dto.TypeId && x.CategoryId == dto.CategoryId))
+            if (! await _useAllRepositoryEXProduct.Type_Category.Any(x => x.TypeId == dto.TypeId && x.CategoryId == dto.CategoryId))
             {
-                _Type_Category.CreateAsync(new Type_Category { CategoryId = dto.CategoryId, TypeId = dto.TypeId });
+                await _useAllRepositoryEXProduct.Type_Category.CreateAsync(new Type_Category { CategoryId = dto.CategoryId, TypeId = dto.TypeId });
             }
             if (dto.DeletedImages != null)
             {
                 foreach (var img in dto.DeletedImages)
                 {
-                   await _Images.DeleteAsync(img);
+                   await _useAllRepositoryEXProduct.Images.DeleteAsync(img);
                 }
             }
-             _color.DeleteAsyncmatch(x => x.ProductId == id);
-            _Size.DeleteAsyncmatch(x => x.ProductId == id);
+            _useAllRepositoryEXProduct.Color.DeleteAsyncmatch(x => x.ProductId == id);
+            _useAllRepositoryEXProduct.Size.DeleteAsyncmatch(x => x.ProductId == id);
+            _useAllRepositoryEXProduct.Poroduct_Color_sizes.DeleteAsyncmatch(x => x.ProductId == id);
             _context.SaveChanges();
 
             foreach (var color in dto.Colors.Distinct())
             {
-                if (! await _color.Any(x => x.ProductId == id && x.color == color))
+                if (! await _useAllRepositoryEXProduct.Color.Any(x => x.ProductId == id && x.color == color))
                 {
-                    _color.CreateAsync(new Color { color = color, ProductId =id });
+                    _useAllRepositoryEXProduct.Color.CreateAsync(new Color { color = color, ProductId =id });
 
                 }
             }
             foreach (var _size in dto.Sizes.Distinct())
             {
-                if (! await _Size.Any(x => x.ProductId == id && x.size == _size))
+                if (! await _useAllRepositoryEXProduct.Size.Any(x => x.ProductId == id && x.size == _size))
                 {
-                    _Size.CreateAsync(new Size { size = _size, ProductId = id });
+                    await _useAllRepositoryEXProduct.Size.CreateAsync(new Size { size = _size, ProductId = id });
 
                 }
             }
@@ -242,9 +253,9 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
 
 
             product = _mapper.Map<ProductDisplayDto>(Product);
-            var Images = await _Images.GetData(x => x.productId ==id);
-            var CategoryName = await _Category.GetData(x => x.Id == dto.CategoryId);
-            var TypeName = await _Type.GetData(x => x.Id == dto.TypeId);
+            var Images = await _useAllRepositoryEXProduct.Images.GetData(x => x.productId ==id);
+            var CategoryName = await _useAllRepositoryEXProduct.Categories.GetData(x => x.Id == dto.CategoryId);
+            var TypeName = await _useAllRepositoryEXProduct.Types.GetData(x => x.Id == dto.TypeId);
 
             product.CategoryName = CategoryName.SingleOrDefault().Name;
             product.TypeName = TypeName.SingleOrDefault().Name;
@@ -270,11 +281,11 @@ namespace ClothesApiAuthRepositoryUOW.EF.Repositories
         private  async  Task<ProductDisplayDto> CheckValidProducts(int CategoryId , int TypeId , string Gender , IEnumerable<string> sizes , IEnumerable<IFormFile> ImageFiles)
         {
             var product = new ProductDisplayDto();
-            if (! await _Category.Any(x => x.Id == CategoryId))
+            if (! await _useAllRepositoryEXProduct.Categories.Any(x => x.Id == CategoryId))
             {
                 product.Message = $"No Category With id {CategoryId} ";
             }
-            if (! await  _Type.Any(x => x.Id == TypeId))
+            if (! await _useAllRepositoryEXProduct.Types.Any(x => x.Id == TypeId))
             {
                 product.Message += $"No Type With id {TypeId} ";  
             }
